@@ -123,3 +123,4 @@ D:\Practice\StudentApi\obj\Debug\net10.0\ref\StudentApi.dll
 D:\Practice\StudentApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
 D:\Practice\StudentApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 D:\Practice\StudentApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Practice\StudentApi\obj\Debug\net10.0\StudentApi.sourcelink.json
