@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentApi.Data;
@@ -6,6 +7,7 @@ using StudentApi.DTOs;
 
 namespace StudentApi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class StudentsController : ControllerBase
@@ -18,10 +20,45 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStudents()
+    public async Task<IActionResult> GetStudents([FromQuery] StudentQueryDto queryDto)
     {
-        var students = await _context.Students.ToListAsync();
-        return Ok(students);
+        var query = _context.Students.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(queryDto.Name))
+        {
+            var name = queryDto.Name.Trim().ToLower();
+            query = query.Where(student => student.Name.ToLower().Contains(name));
+        }
+
+        if (!string.IsNullOrWhiteSpace(queryDto.Email))
+        {
+            var email = queryDto.Email.Trim().ToLower();
+            query = query.Where(student => student.Email.ToLower().Contains(email));
+        }
+
+        if (queryDto.Age.HasValue)
+        {
+            query = query.Where(student => student.Age == queryDto.Age.Value);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var students = await query
+            .OrderBy(student => student.Id)
+            .Skip((queryDto.Page - 1) * queryDto.PageSize)
+            .Take(queryDto.PageSize)
+            .ToListAsync();
+
+        var response = new PagedResponseDto<Student>
+        {
+            Items = students,
+            Page = queryDto.Page,
+            PageSize = queryDto.PageSize,
+            TotalCount = totalCount,
+            TotalPages = (int)Math.Ceiling(totalCount / (double)queryDto.PageSize)
+        };
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
